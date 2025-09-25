@@ -147,23 +147,18 @@
 
     <script>
         function updateTimer() {
-            // Получаем текущую дату
             const now = new Date();
 
-            // Определяем целевой год (если текущий месяц декабрь и число больше 10, берем следующий год)
+            // Определяем целевой год
             let targetYear = now.getFullYear();
             if (now.getMonth() === 11 && now.getDate() > 10) {
                 targetYear++;
             }
 
-            // Создаем целевую дату (10 декабря текущего или следующего года)
-            const targetDate = new Date(targetYear, 11, 10); // 11 - это декабрь (месяцы от 0 до 11)
+            const targetDate = new Date(targetYear, 11, 10); // 10 декабря
 
-            // Вычисляем разницу во времени в миллисекундах
-            const difference = targetDate - now;
-
-            // Если дата уже прошла в этом году, показываем 0
-            if (difference <= 0) {
+            // Если дата уже прошла
+            if (targetDate <= now) {
                 document.getElementById('months').textContent = '0';
                 document.getElementById('days').textContent = '0';
                 document.getElementById('hours').textContent = '0';
@@ -173,30 +168,41 @@
                 return;
             }
 
-            // Вычисляем количество месяцев
+            // Вычисляем разницу в миллисекундах
+            const difference = targetDate - now;
+
+            // Вычисляем месяцы корректно
             let months = 0;
+            let daysRemaining = 0;
+
+            // Создаем копию текущей даты для расчетов
             let tempDate = new Date(now);
 
-            // Добавляем месяцы по одному, пока не достигнем целевого месяца
-            while (tempDate.getMonth() !== targetDate.getMonth() || tempDate.getFullYear() !== targetDate.getFullYear()) {
-                months++;
-                tempDate.setMonth(tempDate.getMonth() + 1);
+            // Добавляем месяцы по одному, пока не превысим целевую дату
+            while (true) {
+                // Пробуем добавить месяц
+                const nextMonth = new Date(tempDate);
+                nextMonth.setMonth(nextMonth.getMonth() + 1);
+
+                // Если после добавления месяца мы не превысили целевую дату
+                if (nextMonth <= targetDate) {
+                    months++;
+                    tempDate = nextMonth;
+                } else {
+                    // Вычисляем оставшиеся дни
+                    daysRemaining = Math.floor((targetDate - tempDate) / (1000 * 60 * 60 * 24));
+                    break;
+                }
             }
 
-            // Если текущий день больше целевого, уменьшаем количество месяцев на 1
-            if (now.getDate() > targetDate.getDate()) {
-                months--;
-            }
-
-            // Вычисляем оставшиеся дни, часы, минуты и секунды
-            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            // Вычисляем оставшиеся часы, минуты и секунды
             const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
             // Обновляем значения на странице
             document.getElementById('months').textContent = months;
-            document.getElementById('days').textContent = days;
+            document.getElementById('days').textContent = daysRemaining;
             document.getElementById('hours').textContent = hours;
             document.getElementById('minutes').textContent = minutes;
             document.getElementById('seconds').textContent = seconds;
