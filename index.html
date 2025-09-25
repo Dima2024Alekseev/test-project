@@ -1,14 +1,214 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Главная страница</title>
+    <title>Таймер до 10 декабря</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .timer {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .time-unit {
+            flex: 1;
+            min-width: 120px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px 10px;
+            transition: transform 0.3s, background 0.3s;
+        }
+
+        .time-unit:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .time-value {
+            font-size: 3rem;
+            font-weight: bold;
+            display: block;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .time-label {
+            font-size: 1rem;
+            margin-top: 5px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .target-date {
+            margin-top: 30px;
+            font-size: 1.2rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        @media (max-width: 600px) {
+            .timer {
+                justify-content: center;
+            }
+
+            .time-unit {
+                min-width: 100px;
+            }
+
+            .time-value {
+                font-size: 2.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Привет мир!!!</h1>
+    <div class="container">
+        <h1>До 10 декабря осталось:</h1>
+        <p class="subtitle">Таймер обратного отсчета</p>
+
+        <div class="timer">
+            <div class="time-unit">
+                <span id="months" class="time-value">0</span>
+                <span class="time-label">Месяцев</span>
+            </div>
+            <div class="time-unit">
+                <span id="days" class="time-value">0</span>
+                <span class="time-label">Дней</span>
+            </div>
+            <div class="time-unit">
+                <span id="hours" class="time-value">0</span>
+                <span class="time-label">Часов</span>
+            </div>
+            <div class="time-unit">
+                <span id="minutes" class="time-value">0</span>
+                <span class="time-label">Минут</span>
+            </div>
+            <div class="time-unit">
+                <span id="seconds" class="time-value">0</span>
+                <span class="time-label">Секунд</span>
+            </div>
+        </div>
+
+        <div class="target-date">
+            Целевая дата: 10 декабря <span id="target-year"></span> года
+        </div>
+    </div>
+
+    <script>
+        function updateTimer() {
+            // Получаем текущую дату
+            const now = new Date();
+
+            // Определяем целевой год (если текущий месяц декабрь и число больше 10, берем следующий год)
+            let targetYear = now.getFullYear();
+            if (now.getMonth() === 11 && now.getDate() > 10) {
+                targetYear++;
+            }
+
+            // Создаем целевую дату (10 декабря текущего или следующего года)
+            const targetDate = new Date(targetYear, 11, 10); // 11 - это декабрь (месяцы от 0 до 11)
+
+            // Вычисляем разницу во времени в миллисекундах
+            const difference = targetDate - now;
+
+            // Если дата уже прошла в этом году, показываем 0
+            if (difference <= 0) {
+                document.getElementById('months').textContent = '0';
+                document.getElementById('days').textContent = '0';
+                document.getElementById('hours').textContent = '0';
+                document.getElementById('minutes').textContent = '0';
+                document.getElementById('seconds').textContent = '0';
+                document.getElementById('target-year').textContent = targetYear;
+                return;
+            }
+
+            // Вычисляем количество месяцев
+            let months = 0;
+            let tempDate = new Date(now);
+
+            // Добавляем месяцы по одному, пока не достигнем целевого месяца
+            while (tempDate.getMonth() !== targetDate.getMonth() || tempDate.getFullYear() !== targetDate.getFullYear()) {
+                months++;
+                tempDate.setMonth(tempDate.getMonth() + 1);
+            }
+
+            // Если текущий день больше целевого, уменьшаем количество месяцев на 1
+            if (now.getDate() > targetDate.getDate()) {
+                months--;
+            }
+
+            // Вычисляем оставшиеся дни, часы, минуты и секунды
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            // Обновляем значения на странице
+            document.getElementById('months').textContent = months;
+            document.getElementById('days').textContent = days;
+            document.getElementById('hours').textContent = hours;
+            document.getElementById('minutes').textContent = minutes;
+            document.getElementById('seconds').textContent = seconds;
+            document.getElementById('target-year').textContent = targetYear;
+        }
+
+        // Обновляем таймер сразу при загрузке страницы
+        updateTimer();
+
+        // Обновляем таймер каждую секунду
+        setInterval(updateTimer, 1000);
+    </script>
 </body>
 
 </html>
